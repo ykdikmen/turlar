@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Turlar</title>
+<meta name="description" content="Hello Vespa Roma · turlar, ödemeler, cari hesap ve raporlar">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Turlar">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EAE5DB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1B19" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="ikon-180.png">
+<link rel="icon" type="image/png" href="ikon-192.png">
+<style>
+:root { --zemin:#EAE5DB; --kart:#F4F0E8; --murekkep:#24211C; --soluk:#716A5F; --cizgi:#D3CBBD; --kehribar:#D39A2C; --vurgu:#24211C; --vurguYazi:#F4F0E8; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --zemin:#1C1B19; --kart:#262420; --murekkep:#F0EBE2; --soluk:#A1998C; --cizgi:#383530; --vurgu:#F0EBE2; --vurguYazi:#1C1B19; color-scheme: dark; } }
+:root[data-theme="dark"] { --zemin:#1C1B19; --kart:#262420; --murekkep:#F0EBE2; --soluk:#A1998C; --cizgi:#383530; --vurgu:#F0EBE2; --vurguYazi:#1C1B19; color-scheme: dark; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--zemin); color: var(--murekkep); }
+body { font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+.k-acilis { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: var(--soluk); font-weight: 600; background: var(--zemin); z-index: 100; }
+.k-logo { width: 72px; height: 72px; border-radius: 20px; background: #24211C; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 26px rgba(0,0,0,.18); }
+.k-logo span { color: #F4F0E8; font: 800 40px/1 -apple-system, system-ui, sans-serif; position: relative; top: -2px; }
+.k-logo i { position: absolute; width: 22px; height: 4px; border-radius: 2px; background: #D39A2C; margin-top: 42px; }
+.k-donen { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--cizgi); border-top-color: var(--murekkep); animation: kdon .8s linear infinite; }
+@keyframes kdon { to { transform: rotate(360deg); } }
+.k-giris { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
+.k-kart { width: 100%; max-width: 400px; background: var(--kart); border-radius: 22px; padding: 26px 22px 20px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
+.k-marka { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--soluk); }
+.k-kart h1 { margin: 8px 0 6px; font-size: 30px; line-height: 1.1; font-weight: 700; }
+.k-kart p { margin: 0 0 16px; color: var(--soluk); }
+.k-kart label { display: block; font-size: 13px; font-weight: 650; color: var(--soluk); margin: 0 2px 6px; }
+.k-kart textarea, .k-kart input { width: 100%; font: 16px/1.35 ui-monospace, "SF Mono", Menlo, monospace; padding: 12px 13px; border-radius: 13px; border: 1px solid var(--cizgi); background: var(--zemin); color: var(--murekkep); resize: none; }
+.k-kart textarea:focus, .k-kart input:focus { outline: 2px solid var(--kehribar); outline-offset: 1px; }
+.k-kart .k-dugme { width: 100%; margin-top: 14px; min-height: 50px; border: 0; border-radius: 14px; background: var(--vurgu); color: var(--vurguYazi); font-weight: 700; font-size: 17px; }
+.k-kart .k-dugme:disabled { opacity: .55; }
+.k-hata { color: #C0392B; font-weight: 600; min-height: 20px; margin: 10px 2px 0; font-size: 14px; white-space: pre-wrap; }
+.k-not { font-size: 13px; color: var(--soluk); margin: 14px 2px 0; }
+.k-ekle { margin: 0 0 16px; padding: 12px 13px; border-radius: 14px; background: #FBEFD5; color: #3A2A08; font-size: 14px; }
+.k-ekle b { display: block; margin-bottom: 3px; }
+.k-surucu { position: fixed; inset: 0; padding-top: env(safe-area-inset-top); background: var(--zemin); display: flex; flex-direction: column; }
+.k-surucu iframe { flex: 1; width: 100%; border: 0; display: block; background: var(--zemin); }
+.k-bilgi { max-width: 420px; margin: 0 auto; padding: 40px 20px; text-align: center; color: var(--soluk); }
+.k-bilgi h2 { color: var(--murekkep); font-size: 21px; margin: 14px 0 8px; }
+.k-bilgi button { margin-top: 18px; min-height: 46px; padding: 0 22px; border: 0; border-radius: 13px; background: var(--vurgu); color: var(--vurguYazi); font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+<div id="kAcilis" class="k-acilis"><div class="k-logo"><span>T</span><i></i></div><div class="k-donen"></div></div>
+
+<div id="kGiris" class="k-giris" hidden>
+  <form id="kForm" class="k-kart" autocomplete="off" novalidate>
+    <div class="k-marka">HELLO VESPA ROMA</div>
+    <h1>Turlar</h1>
+    <p>Program, ödemeler, cari hesap ve raporlar tek yerde.</p>
+    <div id="kEkleIpucu" class="k-ekle" hidden><b>Önce ana ekrana ekle</b>Alttaki Paylaş düğmesine (kare ve ok) bas › "Ana Ekrana Ekle". Sonra uygulamayı ana ekrandaki "Turlar" ikonundan açıp burada giriş yap.</div>
+    <label for="kKod">Giriş kodu ya da link</label>
+    <textarea id="kKod" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="ortak şifren (XXXXX-XXXXX) ya da sana gelen link"></textarea>
+    <div id="kSifreAlan" hidden style="margin-top:12px"><label for="kSifre">Ortak paneli şifresi</label><input id="kSifre" type="text" spellcheck="false" autocapitalize="characters" placeholder="XXXXX-XXXXX"></div>
+    <button id="kDugme" class="k-dugme" type="submit">Giriş</button>
+    <div id="kHata" class="k-hata" role="alert"></div>
+    <p class="k-not">Kodun yoksa ya da çalışmıyorsa Kerem'den iste. Sürücüysen sana WhatsApp'tan gelen kendi linkini yapıştır.</p>
+  </form>
+</div>
+
+<div id="kSurucu" class="k-surucu" hidden></div>
+<div id="kMesaj" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  var AYAR = { adres: "", surum: "1.0.0" };
+  if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
+  var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
+  var $ = function (id) { return document.getElementById(id); };
+  function oku(a) { try { return JSON.parse(localStorage.getItem(a) || "null"); } catch (e) { return null; } }
+  function yaz(a, v) { try { localStorage.setItem(a, JSON.stringify(v)); } catch (e) {} }
+  function sil(a) { try { localStorage.removeItem(a); } catch (e) {} }
+  var bagimsiz = (window.navigator.standalone === true) || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  if ("serviceWorker" in navigator) { try { navigator.serviceWorker.register("sw.js").catch(function () {}); } catch (e) {} }
+
+  // ---- Google'a istek ----
+  function post(adres, govde, sure) {
+    var ac = window.AbortController ? new AbortController() : null;
+    var z = setTimeout(function () { if (ac) ac.abort(); }, (sure || 30) * 1000);
+    return fetch(adres, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(govde), redirect: "follow", credentials: "omit", signal: ac ? ac.signal : undefined })
+      .then(function (r) { return r.text(); })
+      .then(function (t) { clearTimeout(z); var j; try { j = JSON.parse(t); } catch (e) { throw new Error("Google'dan beklenmeyen cevap geldi. Kod.gs güncel mi, yeni sürüm dağıtıldı mı?"); } return j; },
+        function (e) { clearTimeout(z); throw new Error(navigator.onLine ? (e && e.name === "AbortError" ? "Google cevap vermedi (zaman aşımı)." : "Google'a ulaşılamadı.") : "İnternet yok."); });
+  }
+
+  // ---- giriş ----
+  function girisCoz(metin) {
+    var s = String(metin || "").trim();
+    var m = s.match(/https?:\/\/[^\s"'<>]+/i);
+    if (m) {
+      var u;
+      try { u = new URL(m[0]); } catch (e) { return null; }
+      var adres = u.origin + u.pathname;
+      if (!/\/exec$/.test(adres)) return null;
+      if (u.searchParams.get("k")) return { adres: adres, k: u.searchParams.get("k") };
+      if (u.searchParams.get("s")) return { adres: adres, s: u.searchParams.get("s") };
+      // ortak paneli mesajı olduğu gibi yapıştırıldıysa: link + "Şifre: XXXXX-XXXXX"
+      var sf = s.replace(m[0], " ").match(/(?:^|[^A-Za-z0-9])([A-Za-z0-9]{5}-[A-Za-z0-9]{5})(?![A-Za-z0-9])/);
+      if (sf) return { adres: adres, sifre: sf[1] };
+      return { adres: adres, sifreGerek: true };
+    }
+    var sade = s.replace(/\s+/g, "");
+    if (/^[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}$/.test(sade)) return { adres: AYAR.adres, sifre: sade };
+    if (/^[a-f0-9]{16,64}$/.test(sade)) return { adres: AYAR.adres, s: sade };
+    if (/^[A-Za-z0-9]{20,64}$/.test(sade)) return { adres: AYAR.adres, k: sade };
+    return null;
+  }
+  function girisGoster(mesaj) {
+    $("kAcilis").hidden = true; $("kSurucu").hidden = true; $("kGiris").hidden = false;
+    $("kEkleIpucu").hidden = !(ios && !bagimsiz);
+    $("kHata").textContent = mesaj || "";
+  }
+  $("kKod").addEventListener("input", function () {
+    var c = girisCoz($("kKod").value);
+    $("kSifreAlan").hidden = !(c && c.sifreGerek);
+    $("kHata").textContent = "";
+  });
+  $("kForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var c = girisCoz($("kKod").value);
+    if (!c) { $("kHata").textContent = "Bu kod ya da link tanınmadı. Sana gelen mesajdaki linki ya da şifreyi olduğu gibi yapıştır."; return; }
+    if (c.sifreGerek) { var sf = $("kSifre").value.replace(/\s+/g, ""); if (!sf) { $("kHata").textContent = "Şifreni de yaz."; $("kSifre").focus(); return; } c.sifre = sf; }
+    if (!c.adres) { $("kHata").textContent = "Şifreyle birlikte ortak paneli linkini de yapıştır (Kerem'in gönderdiği mesajdaki)."; return; }
+    var g = { islem: "uygGiris" };
+    if (c.k) g.k = c.k; else if (c.s) g.s = c.s; else g.sifre = c.sifre;
+    var d = $("kDugme");
+    d.disabled = true; d.textContent = "Kontrol ediliyor…"; $("kHata").textContent = "";
+    post(c.adres, g).then(function (j) {
+      if (!j || j.hata) throw new Error(j && j.hata === "Şifre yanlış" ? "Şifre yanlış. Büyük/küçük harf fark etmez."
+        : j && /^(yetkisiz|bilinmeyen işlem)$/.test(j.hata) && !c.s ? "Google tarafı bu uygulamayı henüz tanımıyor: yeni Kod.gs yapıştırılıp \"Yeni sürüm\" olarak dağıtılmalı (Kerem)."
+          : (j && j.hata) || "Giriş olmadı.");
+      var o = { rol: j.rol, ad: j.ad, adres: c.adres, zaman: Date.now() };
+      if (j.rol === "surucu") o.s = c.s;
+      else { o.k = j.rol === "ortak" ? j.jeton : c.k; o.paket = j.paket; }
+      yaz(D_OTURUM, o);
+      $("kKod").value = ""; $("kSifre").value = "";
+      basla();
+    }).catch(function (h) { $("kHata").textContent = String((h && h.message) || h); })
+      .then(function () { d.disabled = false; d.textContent = "Giriş"; });
+  });
+
+  // ---- uygulama paketi: şifreli, telefonda saklanır; yenisi arkadan iner ----
+  function b64(b) { var s = atob(b), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+  function paketIndir(dosya) { return fetch(dosya).then(function (r) { if (!r.ok) throw new Error("uygulama dosyası alınamadı (" + r.status + ")"); return r.arrayBuffer(); }); }
+  function paketCoz(buf, anahtar) {
+    var u = new Uint8Array(buf);
+    var bas = new TextDecoder().decode(u.subarray(0, 8));
+    if (bas !== "TURLAR1\n") return Promise.reject(new Error("uygulama dosyası bozuk"));
+    return crypto.subtle.importKey("raw", b64(anahtar), { name: "AES-GCM" }, false, ["decrypt"])
+      .then(function (k) { return crypto.subtle.decrypt({ name: "AES-GCM", iv: u.subarray(8, 20) }, k, u.subarray(20)); })
+      .then(function (d) { return new TextDecoder().decode(d); });
+  }
+  function surumAl() { return fetch("surum.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("surum.json " + r.status); return r.json(); }); }
+  function paketKodu(o) {
+    var p = oku(D_PAKET);
+    var dosyaSoz = p && p.dosya ? Promise.resolve(p) : surumAl().then(function (s) { yaz(D_PAKET, s); return s; });
+    return dosyaSoz.then(function (s) {
+      return paketIndir(s.dosya).catch(function (e) { // eski dosya yayından kalkmış olabilir: güncelini al
+        return surumAl().then(function (y) { yaz(D_PAKET, y); return paketIndir(y.dosya); });
+      });
+    }).then(function (buf) {
+      return paketCoz(buf, o.paket).catch(function () {
+        // anahtar değişmiş olabilir: Google'dan güncelini sor
+        return post(o.adres, { islem: "uygYenile", k: o.k }).then(function (j) {
+          if (!j || j.hata || !j.paket) throw new Error((j && j.hata) || "uygulama açılamadı");
+          o.paket = j.paket; if (j.jeton) o.k = j.jeton; yaz(D_OTURUM, o);
+          return paketCoz(buf, o.paket);
+        });
+      });
+    });
+  }
+  function kodCalistir(kod) {
+    return new Promise(function (coz, red) {
+      var s = document.createElement("script");
+      var url = URL.createObjectURL(new Blob([kod], { type: "text/javascript" }));
+      s.src = url;
+      s.onload = function () { URL.revokeObjectURL(url); coz(); };
+      s.onerror = function () { URL.revokeObjectURL(url); red(new Error("uygulama kodu çalışmadı")); };
+      document.head.appendChild(s);
+    });
+  }
+  function guncellemeBak(uyg) {
+    var p = oku(D_PAKET) || {};
+    surumAl().then(function (s) {
+      if (!s || !s.dosya || s.dosya === p.dosya) return;
+      return paketIndir(s.dosya).then(function () {
+        yaz(D_PAKET, s);
+        if (uyg && uyg.tost) uyg.tost("Yeni sürüm hazır", ["Yenile", function () { location.reload(); }], 12000);
+      });
+    }).catch(function () {});
+  }
+  // ortağın oturumu: süresi 30 günden az kaldıysa yenilenir; şifre iptal edildiyse giriş ekranına dönülür
+  function jetonBitis(k) { try { var p = String(k).split(".")[0].replace(/-/g, "+").replace(/_/g, "/"); return JSON.parse(decodeURIComponent(escape(atob(p)))).e || 0; } catch (e) { return 0; } }
+  function oturumuYenile(o) {
+    if (o.rol === "ortak" && jetonBitis(o.k) - Date.now() > 30 * 86400000) return;
+    if (o.rol === "yonetici" && Date.now() - (o.kontrol || 0) < 86400000) return;
+    post(o.adres, { islem: "uygYenile", k: o.k }).then(function (j) {
+      if (j && j.hata === "yetkisiz") { oturumBitti(); return; }
+      if (!j || j.hata) return;
+      if (j.jeton) o.k = j.jeton;
+      if (j.paket) o.paket = j.paket;
+      o.kontrol = Date.now();
+      yaz(D_OTURUM, o);
+    }).catch(function () {});
+  }
+  function oturumBitti() {
+    var o = oku(D_OTURUM);
+    sil(D_OTURUM);
+    var m = "Oturumun kapandı (şifre yenilenmiş ya da süresi dolmuş olabilir). Tekrar giriş yap.";
+    if (window.TurlarUygulama && o && o.rol !== "surucu") { location.hash = "oturum"; location.reload(); return; }
+    girisGoster(m);
+  }
+  function verileriSil() {
+    return (window.Calisma && Calisma.dosyalariSil ? Calisma.dosyalariSil() : Promise.resolve()).then(function () { location.reload(); });
+  }
+  function cikis() {
+    sil(D_OTURUM);
+    try { localStorage.removeItem("turlar.sekme"); } catch (e) {}
+    verileriSil();
+  }
+  function uygulamaAc(o) {
+    $("kAcilis").hidden = false;
+    paketKodu(o).then(kodCalistir).then(function () {
+      return window.TurlarUygulama.baslat({ rol: o.rol, ad: o.ad, adres: o.adres, k: o.k, depo: "turlar" }, {
+        surum: AYAR.surum, cikis: cikis, oturumBitti: oturumBitti, verileriSil: verileriSil,
+        sunucu: function (g) {
+          return post(o.adres, Object.assign({ k: o.k }, g)).then(function (j) {
+            if (j && j.hata === "yetkisiz") { oturumBitti(); throw new Error("Oturum kapandı"); }
+            if (!j || j.hata) throw new Error((j && j.hata) || "Google'dan cevap gelmedi");
+            return j;
+          });
+        },
+      });
+    }).then(function (uyg) {
+      $("kAcilis").hidden = true;
+      oturumuYenile(o);
+      guncellemeBak(uyg);
+    }).catch(function (e) {
+      $("kAcilis").hidden = true;
+      bilgiEkrani("Uygulama açılamadı", String((e && e.message) || e) + (navigator.onLine ? "" : "\nİlk açılış için internet gerekir."), "Tekrar dene", function () { location.reload(); }, true);
+    });
+  }
+  function bilgiEkrani(baslik, metin, dugme, fn, cikisVar) {
+    var m = $("kMesaj");
+    m.hidden = false;
+    m.innerHTML = '<div class="k-bilgi"><div class="k-logo" style="margin:0 auto;position:relative"><span>T</span><i></i></div><h2></h2><p style="white-space:pre-wrap"></p><button type="button" id="kBilgiDugme"></button>' + (cikisVar ? '<br><button type="button" id="kBilgiCikis" style="background:none;color:var(--soluk);margin-top:8px">Çıkış yap</button>' : "") + "</div>";
+    m.querySelector("h2").textContent = baslik; m.querySelector("p").textContent = metin;
+    $("kBilgiDugme").textContent = dugme; $("kBilgiDugme").onclick = fn;
+    if (cikisVar) $("kBilgiCikis").onclick = cikis;
+  }
+
+  // ---- sürücü: Google'daki sürücü sayfasının aynısı, uygulama içinde ----
+  function surucuModu(o) {
+    $("kAcilis").hidden = true; $("kGiris").hidden = true;
+    var kap = $("kSurucu"); kap.hidden = false;
+    var dil = "tr"; try { dil = localStorage.getItem("turlar.surucuDil") || "tr"; } catch (e) {}
+    var anahtar = "turlar.surucuSayfa";
+    var cerceve = null;
+    window.__surucuCagri = function (islev, args) {
+      if (islev === "surucuVerisi" && args[1]) { try { localStorage.setItem("turlar.surucuDil", args[1]); } catch (e) {} }
+      return post(o.adres, { islem: "uygSurucu", s: o.s, islev: islev, args: args }).then(function (j) {
+        if (j && j.hata) { if (/geçersiz|iptal/i.test(j.hata) && /link/i.test(j.hata)) { setTimeout(oturumBitti, 50); } throw new Error(j.hata); }
+        return j.sonuc;
+      });
+    };
+    window.__surucuCikis = function () { if (confirm("Çıkış yapılsın mı? Tekrar girmek için linkin gerekir.")) cikis(); };
+    var EK = "<script>(function(){function mk(s,f){return new Proxy({},{get:function(_,ad){if(ad==='withSuccessHandler')return function(fn){return mk(fn,f);};if(ad==='withFailureHandler')return function(fn){return mk(s,fn);};"
+      + "return function(){var a=Array.prototype.slice.call(arguments);parent.__surucuCagri(ad,a).then(function(r){if(s)s(r);},function(e){if(f)f(e);});};}});}window.google={script:{run:mk(null,null)}};"
+      + "document.addEventListener('DOMContentLoaded',function(){var d=document.createElement('div');d.style.cssText='text-align:center;padding:18px 0 calc(28px + env(safe-area-inset-bottom));font-size:13px';"
+      + "var b=document.createElement('button');b.type='button';b.textContent='Turlar uygulaması · çıkış';b.style.cssText='border:0;background:none;color:#8A8378;font:inherit;text-decoration:underline';b.onclick=function(){parent.__surucuCikis();};d.appendChild(b);document.body.appendChild(d);});"
+      + "})();<\/script>";
+    function goster(html) {
+      var i = html.indexOf("<head>");
+      var tam = i >= 0 ? html.slice(0, i + 6) + EK + html.slice(i + 6) : EK + html;
+      var f = document.createElement("iframe");
+      f.title = "Turlarım";
+      f.srcdoc = tam;
+      if (cerceve) cerceve.remove();
+      kap.appendChild(f);
+      cerceve = f;
+    }
+    var eski = null; try { eski = localStorage.getItem(anahtar); } catch (e) {}
+    if (eski) {
+      goster(eski);
+      // telefondaki kopya hemen açılır; sayfa kendi verisini arkadan tazeler
+      setTimeout(function () { try { var w = cerceve.contentWindow; if (w && typeof w.yukle === "function") w.yukle(true); } catch (e) {} }, 400);
+    } else $("kAcilis").hidden = false;
+    post(o.adres, { islem: "uygSurucu", s: o.s, islev: "sayfa", dil: dil }).then(function (j) {
+      $("kAcilis").hidden = true;
+      if (!j || j.hata) { if (!eski) { if (/geçersiz|iptal/i.test((j && j.hata) || "")) { sil(D_OTURUM); girisGoster(j.hata); } else bilgiEkrani("Sayfa açılamadı", (j && j.hata) || "Google'dan cevap gelmedi", "Tekrar dene", function () { location.reload(); }, true); } return; }
+      try { localStorage.setItem(anahtar, j.html); } catch (e) {}
+      if (!eski) goster(j.html);
+    }).catch(function (e) {
+      $("kAcilis").hidden = true;
+      if (!eski) bilgiEkrani("Sayfa açılamadı", String((e && e.message) || e), "Tekrar dene", function () { location.reload(); }, true);
+    });
+  }
+
+  function basla() {
+    var o = oku(D_OTURUM);
+    if (location.hash === "#oturum") { history.replaceState(null, "", location.pathname); if (!o) { girisGoster("Oturumun kapandı (şifre yenilenmiş ya da süresi dolmuş olabilir). Tekrar giriş yap."); return; } }
+    if (!o || !o.adres) { girisGoster(""); return; }
+    $("kGiris").hidden = true;
+    if (o.rol === "surucu") surucuModu(o); else uygulamaAc(o);
+  }
+  basla();
+})();
+</script>
+</body>
+</html>
