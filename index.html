@@ -75,7 +75,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.0.0" };
+  var AYAR = { adres: "", surum: "1.0.1" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -242,11 +242,22 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     try { localStorage.removeItem("turlar.sekme"); } catch (e) {}
     verileriSil();
   }
+  // Google'daki Kod.gs uygulamayı tanıyor mu (sürüm 7 dağıtıldı mı)? Menü'de gösterilir
+  function sunucuDurumu(o) {
+    return post(o.adres, { islem: "uygYenile", k: o.k }, 20).then(function (j) {
+      if (j && j.rol) return "guncel";
+      if (j && j.hata === "bilinmeyen işlem") return "eski";
+      if (j && j.hata === "yetkisiz") return "yetkisiz";
+      return "bilinmiyor";
+    }, function () { return "baglanti"; });
+  }
   function uygulamaAc(o) {
     $("kAcilis").hidden = false;
+    var sDurum = null;
     paketKodu(o).then(kodCalistir).then(function () {
       return window.TurlarUygulama.baslat({ rol: o.rol, ad: o.ad, adres: o.adres, k: o.k, depo: "turlar" }, {
         surum: AYAR.surum, cikis: cikis, oturumBitti: oturumBitti, verileriSil: verileriSil,
+        sunucuDurumu: function () { return sDurum || (sDurum = sunucuDurumu(o)); },
         sunucu: function (g) {
           return post(o.adres, Object.assign({ k: o.k }, g)).then(function (j) {
             if (j && j.hata === "yetkisiz") { oturumBitti(); throw new Error("Oturum kapandı"); }
