@@ -1,12 +1,12 @@
 {
- "dosya": "uyg.bin?v=79ebdbc4b7",
- "surum": "1.2.0",
- "turlar": "47",
- "tarih": "2026-10-21T13:44:27.361Z",
- "boy": 713068,
+ "dosya": "uyg.bin?v=a9a2cced65",
+ "surum": "1.3.0",
+ "turlar": "48",
+ "tarih": "2026-10-21T14:58:19.451Z",
+ "boy": 720585,
  "sunucu": {
-  "kod": 9,
-  "dosya": "sunucu.bin?v=7180cac30b",
-  "boy": 252811
+  "kod": 10,
+  "dosya": "sunucu.bin?v=ae8f6a3b6a",
+  "boy": 272501
  }
 }

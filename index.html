@@ -46,6 +46,26 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 .k-ekle b { display: block; margin-bottom: 3px; }
 .k-surucu { position: fixed; inset: 0; padding-top: env(safe-area-inset-top); background: var(--zemin); display: flex; flex-direction: column; }
 .k-surucu iframe { flex: 1; width: 100%; border: 0; display: block; background: var(--zemin); }
+.k-onay { position: fixed; inset: 0; z-index: 300; background: rgba(20, 18, 15, .55); display: flex; align-items: flex-end; justify-content: center; }
+.k-onay-kart { width: 100%; max-width: 520px; max-height: 94%; overflow: auto; background: var(--zemin); border-radius: 24px 24px 0 0; padding: 22px 18px calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,.25); animation: kyukari .25s ease; }
+@keyframes kyukari { from { transform: translateY(40px); opacity: 0; } }
+.k-onay .ust { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--soluk); }
+.k-onay h2 { font-size: 21px; margin: 6px 0 12px; line-height: 1.25; }
+.k-onay .saat { font: 800 42px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: -.02em; }
+.k-onay .saat small { font: 600 15px -apple-system, system-ui, sans-serif; color: var(--soluk); margin-left: 8px; letter-spacing: 0; }
+.k-onay .kutu { background: var(--kart); border-radius: 18px; padding: 15px 16px; margin-top: 12px; }
+.k-onay .isim { font-size: 22px; font-weight: 700; line-height: 1.2; }
+.k-onay .alt { color: var(--soluk); font-size: 14px; margin-top: 3px; }
+.k-onay dl { margin: 4px 0 0; } .k-onay dt { font-size: 12px; color: var(--soluk); font-weight: 650; margin-top: 11px; } .k-onay dd { margin: 2px 0 0; font-size: 15.5px; }
+.k-onay dd a { color: inherit; font-weight: 650; }
+.k-onay .cip { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 8px; background: var(--cizgi); margin: 9px 6px 0 0; }
+.k-onay .bilgi { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: #FBEFD5; color: #3A2A08; font-size: 14px; }
+.k-onay .dugmeler { display: flex; gap: 10px; margin-top: 16px; }
+.k-onay .dugmeler button { flex: 1; min-height: 62px; border: 0; border-radius: 16px; font-size: 19px; font-weight: 800; color: #fff; }
+.k-onay .dugmeler button:disabled { opacity: .55; }
+.k-onay .evet { background: #2E7D5B; } .k-onay .hayir { background: #B0392B; }
+.k-onay .sonra { display: block; width: 100%; margin-top: 8px; background: none; border: 0; color: var(--soluk); font-size: 15px; padding: 10px; text-decoration: underline; }
+.k-onay .sonuc { text-align: center; padding: 22px 0 4px; } .k-onay .sonuc b { display: block; font-size: 24px; } .k-onay .sonuc span { display: block; color: var(--soluk); margin-top: 6px; }
 .k-bilgi { max-width: 420px; margin: 0 auto; padding: 40px 20px; text-align: center; color: var(--soluk); }
 .k-bilgi h2 { color: var(--murekkep); font-size: 21px; margin: 14px 0 8px; }
 .k-bilgi button { margin-top: 18px; min-height: 46px; padding: 0 22px; border: 0; border-radius: 13px; background: var(--vurgu); color: var(--vurguYazi); font-weight: 700; font-size: 16px; }
@@ -75,7 +95,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.2.0" };
+  var AYAR = { adres: "", surum: "1.3.0" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -347,6 +367,94 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     },
   };
 
+
+  // ---- tur ataması: onayla / reddet (bildirimden ya da açılışta bekleyen onay) ----
+  var onayAcik = false, onaySira = [], onayGorulen = {}, surucuCerceve = null;
+  function esc(x) { return String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function romaParca(d) { var p = {}; new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(d).forEach(function (x) { p[x.type] = x.value; }); return p; }
+  function saatR(d) { var p = romaParca(d); return p.hour + ":" + p.minute; }
+  function gunR(d, en) {
+    var p = romaParca(d), q = romaParca(new Date()), a = Date.UTC(+p.year, +p.month - 1, +p.day), f = Math.round((a - Date.UTC(+q.year, +q.month - 1, +q.day)) / 864e5);
+    if (f === 0) return en ? "Today" : "Bugün"; if (f === 1) return en ? "Tomorrow" : "Yarın";
+    var G = en ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] : ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"], A = en ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] : ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+    return G[new Date(a).getUTCDay()] + " " + (+p.day) + " " + A[+p.month - 1];
+  }
+  function onayGoster(o, t) {
+    if (!t || onayGorulen[t]) return;
+    if (onayAcik) { if (onaySira.indexOf(t) < 0) onaySira.push(t); return; }
+    onayAcik = true; onayGorulen[t] = true;
+    var en = false; if (o.rol === "surucu") { try { en = (localStorage.getItem("turlar.surucuDil") || "tr") === "en"; } catch (e) {} }
+    var Y = en ? { ust: "TOUR ASSIGNMENT", evet: "Accept", hayir: "Decline", sonra: "Decide later", kapat: "Close", bus: "Meeting point", dil: "Language", ekip: "Team", not: "Note", yol: "Directions", kisi: "people", olmadi: "Could not open", onaylandi: "Accepted ✓", reddedildi: "Declined", haber: "Notified: ", kayit: "Your answer is saved.", iptal: "This tour is cancelled.", daha: "You already answered; you can change it.", surucu: "driver", rehber: "guide" }
+      : { ust: "TUR ATAMASI", evet: "Onayla", hayir: "Reddet", sonra: "Sonra karar vereceğim", kapat: "Kapat", bus: "Buluşma / adres", dil: "Dil", ekip: "Ekip", not: "Not", yol: "Yol tarifi", kisi: "kişi", olmadi: "Açılamadı", onaylandi: "Onayladın ✓", reddedildi: "Reddettin", haber: "Haber verildi: ", kayit: "Cevabın kaydedildi.", iptal: "Bu tur iptal edilmiş.", daha: "Daha önce cevap verdin; istersen değiştirebilirsin.", surucu: "sürücü", rehber: "rehber" };
+    var kap = document.createElement("div"); kap.className = "k-onay"; kap.setAttribute("role", "dialog"); kap.setAttribute("aria-modal", "true");
+    kap.innerHTML = '<div class="k-onay-kart"><div class="ust">' + Y.ust + '</div><div class="k-donen" style="margin:34px auto"></div></div>';
+    document.body.appendChild(kap);
+    var kart = kap.firstChild;
+    var kapat = function () { kap.remove(); onayAcik = false; var s = onaySira.shift(); if (s) onayGoster(o, s); };
+    kap.addEventListener("click", function (e) { if (e.target === kap) kapat(); });
+    post(o.adres, { islem: "uygOnay", islev: "goster", t: t }).then(function (j) {
+      if (!j || j.hata) throw new Error((j && j.hata) || "Google'dan cevap gelmedi");
+      var tur = j.tur, d = new Date(tur.bas), b = new Date(tur.bit), gorev = j.rol === "rehber" ? Y.rehber : Y.surucu;
+      var baslik = en ? (j.atayan ? j.atayan + " assigned you as " + gorev : "You were assigned as " + gorev) : (j.atayan ? j.atayan + " seni " + gorev + " olarak atadı" : gorev.charAt(0).toLocaleUpperCase("tr") + gorev.slice(1) + " olarak atandın");
+      var digerleri = (tur.ekip || []).filter(function (e) { return !e.ben; }).map(function (e) { return e.ad + (e.rehber ? " (R)" : ""); });
+      var h = '<div class="ust">' + Y.ust + "</div><h2>" + esc(baslik) + "</h2>"
+        + '<div class="saat">' + saatR(d) + "<small>– " + saatR(b) + " · " + esc(gunR(d, en)) + "</small></div>"
+        + '<div class="kutu"><div class="isim">' + esc(tur.isim) + (tur.kisi ? " <span style=\"font-weight:500;color:var(--soluk)\">· " + tur.kisi + " " + Y.kisi + "</span>" : "") + "</div>"
+        + (tur.urun ? '<div class="alt">' + esc(tur.urun) + "</div>" : "")
+        + (tur.ekstra ? '<span class="cip">' + esc(/notu$/.test(tur.ekstra) ? (en ? "extra" : "ekstralı") : tur.ekstra) + "</span>" : "")
+        + "<dl><dt>" + Y.bus + "</dt><dd>" + (tur.yer ? esc(tur.yer) : "—") + (tur.yolTarifi ? ' · <a href="' + esc(tur.yolTarifi) + '" target="_blank" rel="noopener">' + Y.yol + "</a>" : "") + "</dd>"
+        + (tur.dil ? "<dt>" + Y.dil + "</dt><dd>" + esc(tur.dil) + "</dd>" : "")
+        + (digerleri.length ? "<dt>" + Y.ekip + "</dt><dd>" + esc(digerleri.join(", ")) + "</dd>" : "")
+        + (tur.not ? "<dt>" + Y.not + "</dt><dd>" + esc(tur.not) + "</dd>" : "") + "</dl></div>";
+      if (tur.iptal) h += '<div class="bilgi">' + Y.iptal + '</div><button type="button" class="sonra" data-k>' + Y.kapat + "</button>";
+      else h += (j.durum !== "bekliyor" ? '<div class="bilgi">' + Y.daha + "</div>" : "")
+        + '<div class="dugmeler"><button type="button" class="evet" data-c="evet">' + Y.evet + '</button><button type="button" class="hayir" data-c="hayir">' + Y.hayir + "</button></div>"
+        + '<button type="button" class="sonra" data-k>' + Y.sonra + "</button>";
+      kart.innerHTML = h;
+      kart.addEventListener("click", function (e) {
+        var x = e.target.closest("button"); if (!x) return;
+        if (x.hasAttribute("data-k")) { kapat(); return; }
+        var c = x.getAttribute("data-c"); if (!c) return;
+        kart.querySelectorAll(".dugmeler button").forEach(function (y) { y.disabled = true; });
+        post(o.adres, { islem: "uygOnay", islev: "cevap", t: t, cevap: c }).then(function (r) {
+          if (!r || r.hata) throw new Error((r && r.hata) || "Google'dan cevap gelmedi");
+          kart.innerHTML = '<div class="ust">' + Y.ust + '</div><div class="sonuc"><b style="color:' + (c === "evet" ? "#2E7D5B" : "#B0392B") + '">' + (c === "evet" ? Y.onaylandi : Y.reddedildi) + "</b><span>" + esc(r.atayan ? Y.haber + r.atayan : Y.kayit) + '</span></div><button type="button" class="sonra" data-k2>' + Y.kapat + "</button>";
+          kart.querySelector("[data-k2]").onclick = kapat;
+          try { var w = surucuCerceve && surucuCerceve.contentWindow; if (w && typeof w.yukle === "function") w.yukle(true); } catch (y) {}
+        }).catch(function (er) { kart.querySelectorAll(".dugmeler button").forEach(function (y) { y.disabled = false; }); alert(String((er && er.message) || er)); });
+      });
+    }).catch(function (e) {
+      kart.innerHTML = '<div class="ust">' + Y.ust + "</div><h2>" + Y.olmadi + '</h2><p style="color:var(--soluk)">' + esc((e && e.message) || e) + '</p><button type="button" class="sonra" data-k>' + Y.kapat + "</button>";
+      kart.querySelector("[data-k]").onclick = kapat;
+    });
+  }
+  // bildirime dokununca gelen adres: #onay=… (ataması) · #tur=… (sürücü: turun sayfası)
+  function adresIsle(o, h) {
+    h = String(h || "");
+    var m = h.match(/#onay=([^&]+)/), t = h.match(/#tur=([^&]+)/);
+    if (!m && !(t && o.rol === "surucu")) return false;
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    if (m) onayGoster(o, decodeURIComponent(m[1]));
+    else surucuTurAc(decodeURIComponent(t[1]));
+    return true;
+  }
+  function surucuTurAc(id) {
+    var dene = 0;
+    (function bak() {
+      try { var w = surucuCerceve && surucuCerceve.contentWindow; if (w && w.D && typeof w.bulTur === "function") { var t = w.bulTur(id); if (t) { w.detayCiz(t); return; } } } catch (e) {}
+      if (++dene < 45) setTimeout(bak, 300);
+    })();
+  }
+  function bekleyenOnaylar(o) {
+    post(o.adres, { islem: "uygOnay", islev: "bekleyen", k: o.k, s: o.s }, 20).then(function (j) { if (j && j.bekleyen) j.bekleyen.forEach(function (x) { onayGoster(o, x.t); }); }).catch(function () {});
+  }
+  function adresDinle(o) {
+    try { navigator.serviceWorker.addEventListener("message", function (e) { if (e.data && e.data.tur === "bildirim") { try { adresIsle(o, new URL(e.data.url).hash); } catch (x) {} } }); } catch (e) {}
+    window.addEventListener("hashchange", function () { adresIsle(o, location.hash); });
+    adresIsle(o, location.hash);
+    setTimeout(function () { bekleyenOnaylar(o); }, 2500);
+  }
+
   // ---- sürücü: Google'daki sürücü sayfasının aynısı, uygulama içinde ----
   function surucuModu(o) {
     $("kAcilis").hidden = true; $("kGiris").hidden = true;
@@ -403,7 +511,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       f.srcdoc = tam;
       if (cerceve) cerceve.remove();
       kap.appendChild(f);
-      cerceve = f;
+      cerceve = f; surucuCerceve = f;
     }
     var eski = null; try { eski = localStorage.getItem(anahtar); } catch (e) {}
     if (eski) {
@@ -428,6 +536,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     if (!o || !o.adres) { girisGoster(""); return; }
     $("kGiris").hidden = true;
     if (o.rol === "surucu") surucuModu(o); else uygulamaAc(o);
+    adresDinle(o);
   }
   basla();
 })();
