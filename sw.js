@@ -1,5 +1,5 @@
 // Turlar uygulaması · çevrimdışı açılış: uygulama dosyaları telefonda saklanır. Google'a giden istekler buraya uğramaz.
-const KABUK = "turlar-kabuk-df78c08f87";
+const KABUK = "turlar-kabuk-3c49dfa677";
 const PAKET = "turlar-paket";
 const DOSYALAR = ["./", "index.html", "manifest.webmanifest", "ikon-180.png", "ikon-192.png", "ikon-512.png"];
 self.addEventListener("install", (e) => {
@@ -14,6 +14,7 @@ self.addEventListener("fetch", (e) => {
   const u = new URL(r.url);
   if (u.origin !== self.location.origin) return;
   const ad = u.pathname.split("/").pop();
+  if (ad === "sunucu.bin") return; // Google kodu: her seferinde doğrudan, saklanmaz
   if (/^uyg(-[\w-]+)?\.bin$/.test(ad)) { // değişmez: önce telefondaki kopya; en son ikisi dışındakiler silinir
     e.respondWith(caches.open(PAKET).then(async (c) => {
       const var_ = await c.match(r);

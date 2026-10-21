@@ -75,7 +75,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.0.1" };
+  var AYAR = { adres: "", surum: "1.1.0" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -258,10 +258,10 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       return window.TurlarUygulama.baslat({ rol: o.rol, ad: o.ad, adres: o.adres, k: o.k, depo: "turlar" }, {
         surum: AYAR.surum, cikis: cikis, oturumBitti: oturumBitti, verileriSil: verileriSil,
         sunucuDurumu: function () { return sDurum || (sDurum = sunucuDurumu(o)); },
-        sunucu: function (g) {
-          return post(o.adres, Object.assign({ k: o.k }, g)).then(function (j) {
+        sunucu: function (g, sure) {
+          return post(o.adres, Object.assign({ k: o.k }, g), sure).then(function (j) {
             if (j && j.hata === "yetkisiz") { oturumBitti(); throw new Error("Oturum kapandı"); }
-            if (j && j.hata === "bilinmeyen işlem") throw new Error("Bu özellik için Google'daki Kod.gs'in yeni sürümü (sürüm 7) gerekli. Bilgisayardan yapıştırıp \"Yeni sürüm\" olarak dağıtınca çalışır.");
+            if (j && j.hata === "bilinmeyen işlem") throw new Error("Bu özellik için Google'daki Kod.gs'in yeni sürümü gerekli (bilinmeyen işlem). Menü › Google tarafı.");
             if (!j || j.hata) throw new Error((j && j.hata) || "Google'dan cevap gelmedi");
             return j;
           });
