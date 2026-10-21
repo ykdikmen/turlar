@@ -140,7 +140,12 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     var d = $("kDugme");
     d.disabled = true; d.textContent = "Kontrol ediliyor…"; $("kHata").textContent = "";
     post(c.adres, g).then(function (j) {
+      // Google'da eski Kod.gs (sürüm 6) varken ana anahtarlı link de çalışsın: anahtar doğru ama uygulama girişi yok
+      if (j && j.hata === "bilinmeyen işlem" && c.k) return paketAnahtariTuret(c.k).then(function (p) { return { rol: "yonetici", ad: "Kerem", paket: p, eskiSunucu: true }; });
+      return j;
+    }).then(function (j) {
       if (!j || j.hata) throw new Error(j && j.hata === "Şifre yanlış" ? "Şifre yanlış. Büyük/küçük harf fark etmez."
+        : j && j.hata === "yetkisiz" && c.k ? "Bu link geçersiz: anahtar tutmuyor."
         : j && /^(yetkisiz|bilinmeyen işlem)$/.test(j.hata) && !c.s ? "Google tarafı bu uygulamayı henüz tanımıyor: yeni Kod.gs yapıştırılıp \"Yeni sürüm\" olarak dağıtılmalı (Kerem)."
           : (j && j.hata) || "Giriş olmadı.");
       var o = { rol: j.rol, ad: j.ad, adres: c.adres, zaman: Date.now() };
@@ -153,6 +158,11 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       .then(function () { d.disabled = false; d.textContent = "Giriş"; });
   });
 
+  function paketAnahtariTuret(k) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode("turlar-uygulama|" + k)).then(function (h) {
+      var u = new Uint8Array(h), s = ""; for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s);
+    });
+  }
   // ---- uygulama paketi: şifreli, telefonda saklanır; yenisi arkadan iner ----
   function b64(b) { var s = atob(b), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
   function paketIndir(dosya) { return fetch(dosya).then(function (r) { if (!r.ok) throw new Error("uygulama dosyası alınamadı (" + r.status + ")"); return r.arrayBuffer(); }); }
@@ -240,6 +250,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
         sunucu: function (g) {
           return post(o.adres, Object.assign({ k: o.k }, g)).then(function (j) {
             if (j && j.hata === "yetkisiz") { oturumBitti(); throw new Error("Oturum kapandı"); }
+            if (j && j.hata === "bilinmeyen işlem") throw new Error("Bu özellik için Google'daki Kod.gs'in yeni sürümü (sürüm 7) gerekli. Bilgisayardan yapıştırıp \"Yeni sürüm\" olarak dağıtınca çalışır.");
             if (!j || j.hata) throw new Error((j && j.hata) || "Google'dan cevap gelmedi");
             return j;
           });
