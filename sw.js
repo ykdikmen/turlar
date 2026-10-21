@@ -1,5 +1,5 @@
 // Turlar uygulaması · çevrimdışı açılış: uygulama dosyaları telefonda saklanır. Google'a giden istekler buraya uğramaz.
-const KABUK = "turlar-kabuk-3c49dfa677";
+const KABUK = "turlar-kabuk-79ebdbc4b7";
 const PAKET = "turlar-paket";
 const DOSYALAR = ["./", "index.html", "manifest.webmanifest", "ikon-180.png", "ikon-192.png", "ikon-512.png"];
 self.addEventListener("install", (e) => {
@@ -40,5 +40,24 @@ self.addEventListener("fetch", (e) => {
     const ag = fetch(r).then((y) => { if (y.ok) c.put(anahtar, y.clone()); return y; }).catch(() => null);
     if (var_) { e.waitUntil(ag); return var_; }
     return (await ag) || new Response("Çevrimdışı", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }));
+});
+
+// ---- bildirimler: Google'dan gelen (şifreli) bildirim telefonda gösterilir; dokununca uygulama ilgili sayfada açılır ----
+self.addEventListener("push", (e) => {
+  let v = {};
+  try { v = e.data ? e.data.json() : {}; } catch (x) { try { v = { metin: e.data.text() }; } catch (y) {} }
+  const secenek = { body: v.metin || "", icon: "ikon-192.png", badge: "ikon-192.png", data: { url: v.url || "./" }, timestamp: v.zaman || Date.now() };
+  if (v.etiket) { secenek.tag = v.etiket; secenek.renotify = true; }
+  e.waitUntil(self.registration.showNotification(v.baslik || "Turlar", secenek));
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const hedef = new URL((e.notification.data && e.notification.data.url) || "./", self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((l) => {
+    for (const c of l) {
+      if (c.url.indexOf(self.registration.scope) === 0) { c.postMessage({ tur: "bildirim", url: hedef }); return c.focus(); }
+    }
+    return self.clients.openWindow(hedef);
   }));
 });

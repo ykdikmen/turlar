@@ -75,7 +75,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.1.0" };
+  var AYAR = { adres: "", surum: "1.2.0" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -257,6 +257,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     paketKodu(o).then(kodCalistir).then(function () {
       return window.TurlarUygulama.baslat({ rol: o.rol, ad: o.ad, adres: o.adres, k: o.k, depo: "turlar" }, {
         surum: AYAR.surum, cikis: cikis, oturumBitti: oturumBitti, verileriSil: verileriSil,
+        bildirim: { destek: BLD.destek, izin: BLD.izin, abonelik: BLD.abonelik, istek: function (islev, ek) { return BLD.istek(o, islev, ek); }, ac: function (anahtar, ayar) { return BLD.ac(o, anahtar, ayar); }, kapat: function () { return BLD.kapat(o); } },
         sunucuDurumu: function () { return sDurum || (sDurum = sunucuDurumu(o)); },
         sunucu: function (g, sure) {
           return post(o.adres, Object.assign({ k: o.k }, g), sure).then(function (j) {
@@ -271,6 +272,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       $("kAcilis").hidden = true;
       oturumuYenile(o);
       guncellemeBak(uyg);
+      BLD.esitle(o);
     }).catch(function (e) {
       $("kAcilis").hidden = true;
       bilgiEkrani("Uygulama açılamadı", String((e && e.message) || e) + (navigator.onLine ? "" : "\nİlk açılış için internet gerekir."), "Tekrar dene", function () { location.reload(); }, true);
@@ -284,6 +286,66 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     $("kBilgiDugme").textContent = dugme; $("kBilgiDugme").onclick = fn;
     if (cikisVar) $("kBilgiCikis").onclick = cikis;
   }
+
+
+  // ---- bildirimler (Web Push): iPhone'da sadece ana ekrandan açılan uygulamada (iOS 16.4+) ----
+  function b64uBayt(s) { s = String(s).replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function cihazAdi() { var a = navigator.userAgent; return /iPhone/.test(a) ? "iPhone" : /iPad/.test(a) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ? "iPad" : /Android/.test(a) ? "Android" : /Mac/.test(a) ? "Mac" : /Windows/.test(a) ? "Windows" : "telefon"; }
+  var BLD = {
+    // { tamam } ya da { tamam: false, neden }
+    destek: function () {
+      if (ios && !bagimsiz) return { tamam: false, neden: "ana", metin: "iPhone'da bildirimler sadece ana ekrana eklenen uygulamada çalışır: Safari › Paylaş › Ana Ekrana Ekle, sonra Turlar'ı ana ekrandan aç." };
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return { tamam: false, neden: "yok", metin: ios ? "Bu iPhone'da bildirim için iOS 16.4 ya da üstü gerekiyor (Ayarlar › Genel › Yazılım Güncelleme)." : "Bu tarayıcı bildirimleri desteklemiyor." };
+      return { tamam: true };
+    },
+    izin: function () { return window.Notification ? Notification.permission : "yok"; },
+    abonelik: function () {
+      if (!BLD.destek().tamam) return Promise.resolve(null);
+      return navigator.serviceWorker.ready.then(function (r) { return r.pushManager.getSubscription(); }).catch(function () { return null; });
+    },
+    istek: function (o, islev, ek) { return post(o.adres, Object.assign({ islem: "uygBildirim", islev: islev, k: o.k, s: o.s }, ek || {})).then(function (j) { if (!j || j.hata) throw new Error((j && j.hata) || "Google'dan cevap gelmedi"); return j; }); },
+    // dokunmanın içinde çağrılmalı: iPhone izni sadece dokunarak ister
+    ac: function (o, anahtar, ayar) {
+      var izin;
+      try { izin = Notification.requestPermission(); } catch (e) { return Promise.reject(e); }
+      return Promise.resolve(izin).then(function (iz) {
+        if (iz !== "granted") throw new Error(iz === "denied" ? "Bildirim izni kapalı. iPhone: Ayarlar › Bildirimler › Turlar › Bildirimlere İzin Ver." : "Bildirim izni verilmedi.");
+        return navigator.serviceWorker.ready;
+      }).then(function (r) {
+        return r.pushManager.getSubscription().then(function (var_) {
+          var k = b64uBayt(anahtar);
+          if (var_ && var_.options && var_.options.applicationServerKey) {
+            var eski = new Uint8Array(var_.options.applicationServerKey), ayni = eski.length === k.length;
+            for (var i = 0; ayni && i < k.length; i++) if (eski[i] !== k[i]) ayni = false;
+            if (ayni) return var_;
+            return var_.unsubscribe().then(function () { return r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: k }); });
+          }
+          return var_ || r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: k });
+        });
+      }).then(function (ab) {
+        var j = ab.toJSON ? ab.toJSON() : ab;
+        var dil = "tr"; try { dil = localStorage.getItem("turlar.surucuDil") || "tr"; } catch (e) {}
+        return BLD.istek(o, "kaydet", { abonelik: { endpoint: j.endpoint, keys: j.keys }, ayar: ayar || null, cihaz: cihazAdi(), dil: o.rol === "surucu" ? dil : "tr" });
+      }).then(function (j) { try { localStorage.setItem("turlar.bildirim", String(Date.now())); } catch (e) {} return j; });
+    },
+    kapat: function (o) {
+      return BLD.abonelik().then(function (ab) {
+        if (!ab) return { kayitli: false };
+        var uc = ab.endpoint;
+        return ab.unsubscribe().catch(function () {}).then(function () { try { localStorage.removeItem("turlar.bildirim"); } catch (e) {} return BLD.istek(o, "sil", { uc: uc }).catch(function () { return { kayitli: false }; }); });
+      });
+    },
+    // açılışta, günde bir: telefon aboneliği değiştiyse Google'daki kayıt tazelenir
+    esitle: function (o) {
+      var son = 0; try { son = Number(localStorage.getItem("turlar.bildirim") || 0); } catch (e) {}
+      if (!son || Date.now() - son < 86400000 || BLD.izin() !== "granted") return;
+      BLD.abonelik().then(function (ab) {
+        if (!ab) return;
+        var j = ab.toJSON();
+        return BLD.istek(o, "kaydet", { abonelik: { endpoint: j.endpoint, keys: j.keys }, cihaz: cihazAdi() }).then(function () { try { localStorage.setItem("turlar.bildirim", String(Date.now())); } catch (e) {} });
+      }).catch(function () {});
+    },
+  };
 
   // ---- sürücü: Google'daki sürücü sayfasının aynısı, uygulama içinde ----
   function surucuModu(o) {
@@ -300,9 +362,37 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       });
     };
     window.__surucuCikis = function () { if (confirm("Çıkış yapılsın mı? Tekrar girmek için linkin gerekir.")) cikis(); };
+    // sürücü sayfasının altındaki zil: turlarım için bildirim
+    var bAnahtar = null;
+    window.__surucuBildirim = function (ne, ciz) {
+      var en = false; try { en = (localStorage.getItem("turlar.surucuDil") || "tr") === "en"; } catch (e) {}
+      var Y = en ? { ac: "🔔 Get notified about my tours", acik: "🔔 Notifications on", kapat: "turn off", dene: "test", bekle: "…", olmadi: "Could not turn on: " } : { ac: "🔔 Turlarım için bildirim al", acik: "🔔 Bildirimler açık", kapat: "kapat", dene: "dene", bekle: "…", olmadi: "Açılamadı: " };
+      var d = BLD.destek();
+      if (ne === "durum") {
+        if (!d.tamam) { ciz({ yazi: Y.ac, ipucu: d.metin, kapali: d.neden === "yok" }); return; }
+        if (!bAnahtar) BLD.istek(o, "anahtar").then(function (j) { bAnahtar = j.anahtar; }).catch(function () {});
+        BLD.abonelik().then(function (ab) { ciz(ab && BLD.izin() === "granted" ? { yazi: Y.acik, acik: true, kapat: Y.kapat, dene: Y.dene } : { yazi: Y.ac }); });
+        return;
+      }
+      if (ne === "ac") {
+        if (!d.tamam) { alert(d.metin); return; }
+        if (!bAnahtar) { alert(en ? "One moment, try again." : "Bir saniye, tekrar dene."); BLD.istek(o, "anahtar").then(function (j) { bAnahtar = j.anahtar; }).catch(function () {}); return; }
+        ciz({ yazi: Y.bekle });
+        BLD.ac(o, bAnahtar).then(function (j) { return BLD.istek(o, "dene", { id: j.id }).catch(function () {}); })
+          .then(function () { window.__surucuBildirim("durum", ciz); }, function (e) { alert(Y.olmadi + ((e && e.message) || e)); window.__surucuBildirim("durum", ciz); });
+        return;
+      }
+      if (ne === "kapat") { BLD.kapat(o).then(function () { window.__surucuBildirim("durum", ciz); }); return; }
+      if (ne === "dene") { BLD.abonelik().then(function (ab) { return ab && BLD.istek(o, "dene", { uc: ab.endpoint }); }).catch(function (e) { alert(String((e && e.message) || e)); }); }
+    };
     var EK = "<script>(function(){function mk(s,f){return new Proxy({},{get:function(_,ad){if(ad==='withSuccessHandler')return function(fn){return mk(fn,f);};if(ad==='withFailureHandler')return function(fn){return mk(s,fn);};"
       + "return function(){var a=Array.prototype.slice.call(arguments);parent.__surucuCagri(ad,a).then(function(r){if(s)s(r);},function(e){if(f)f(e);});};}});}window.google={script:{run:mk(null,null)}};"
       + "document.addEventListener('DOMContentLoaded',function(){var d=document.createElement('div');d.style.cssText='text-align:center;padding:18px 0 calc(28px + env(safe-area-inset-bottom));font-size:13px';"
+      + "var z=document.createElement('div');z.style.cssText='margin:0 16px 14px;padding:12px 14px;border-radius:14px;background:rgba(127,120,110,.12);font-size:15px;text-align:left';"
+      + "var zc=function(x){z.innerHTML='';var a=document.createElement('button');a.type='button';a.textContent=x.yazi;a.style.cssText='border:0;background:none;font:inherit;font-weight:700;color:inherit;padding:4px 0';if(!x.acik&&!x.kapali)a.onclick=function(){parent.__surucuBildirim('ac',zc);};z.appendChild(a);"
+      + "if(x.acik){[['dene',x.dene],['kapat',x.kapat]].forEach(function(p){var l=document.createElement('button');l.type='button';l.textContent=p[1];l.style.cssText='border:0;background:none;font:inherit;color:#8A8378;text-decoration:underline;margin-left:12px';l.onclick=function(){parent.__surucuBildirim(p[0],zc);};z.appendChild(l);});}"
+      + "if(x.ipucu){var i=document.createElement('div');i.textContent=x.ipucu;i.style.cssText='font-size:13px;color:#8A8378;margin-top:4px';z.appendChild(i);}};"
+      + "d.appendChild(z);parent.__surucuBildirim('durum',zc);"
       + "var b=document.createElement('button');b.type='button';b.textContent='Turlar uygulaması · çıkış';b.style.cssText='border:0;background:none;color:#8A8378;font:inherit;text-decoration:underline';b.onclick=function(){parent.__surucuCikis();};d.appendChild(b);document.body.appendChild(d);});"
       + "})();<\/script>";
     function goster(html) {
