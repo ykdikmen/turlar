@@ -95,7 +95,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.4.0" };
+  var AYAR = { adres: "", surum: "1.5.0" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -421,6 +421,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
           kart.innerHTML = '<div class="ust">' + Y.ust + '</div><div class="sonuc"><b style="color:' + (c === "evet" ? "#2E7D5B" : "#B0392B") + '">' + (c === "evet" ? Y.onaylandi : Y.reddedildi) + "</b><span>" + esc(r.atayan ? Y.haber + r.atayan : Y.kayit) + '</span></div><button type="button" class="sonra" data-k2>' + Y.kapat + "</button>";
           kart.querySelector("[data-k2]").onclick = kapat;
           try { var w = surucuCerceve && surucuCerceve.contentWindow; if (w && typeof w.yukle === "function") w.yukle(true); } catch (y) {}
+          try { if (typeof window.__turlarimYenile === "function") window.__turlarimYenile(); } catch (y) {} // ortağın Turlarım sayfası
         }).catch(function (er) { kart.querySelectorAll(".dugmeler button").forEach(function (y) { y.disabled = false; }); alert(String((er && er.message) || er)); });
       });
     }).catch(function (e) {
