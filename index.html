@@ -95,7 +95,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.6.1" };
+  var AYAR = { adres: "", surum: "1.7.0" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -475,7 +475,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     var cerceve = null;
     window.__surucuCagri = function (islev, args) {
       if (islev === "surucuVerisi" && args[1]) { try { localStorage.setItem("turlar.surucuDil", args[1]); } catch (e) {} }
-      return post(o.adres, { islem: "uygSurucu", s: o.s, islev: islev, args: args }).then(function (j) {
+      return post(o.adres, { islem: "uygSurucu", s: o.s, islev: islev, args: args }, islev === "surucuBakim" ? 180 : 45).then(function (j) {
         if (j && j.hata) { if (/geçersiz|iptal/i.test(j.hata) && /link/i.test(j.hata)) { setTimeout(oturumBitti, 50); } throw new Error(j.hata); }
         return j.sonuc;
       });
