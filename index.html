@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Turlar</title>
+<title>Hello Vespa</title>
 <meta name="description" content="Hello Vespa Roma · turlar, ödemeler, cari hesap ve raporlar">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Turlar">
+<meta name="apple-mobile-web-app-title" content="Hello Vespa">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#EAE5DB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1C1B19" media="(prefers-color-scheme: dark)">
@@ -79,7 +79,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
     <div class="k-marka">HELLO VESPA ROMA</div>
     <h1>Turlar</h1>
     <p>Program, ödemeler, cari hesap ve raporlar tek yerde.</p>
-    <div id="kEkleIpucu" class="k-ekle" hidden><b>Önce ana ekrana ekle</b>Alttaki Paylaş düğmesine (kare ve ok) bas › "Ana Ekrana Ekle". Sonra uygulamayı ana ekrandaki "Turlar" ikonundan açıp burada giriş yap.</div>
+    <div id="kEkleIpucu" class="k-ekle" hidden><b>Önce ana ekrana ekle</b>Alttaki Paylaş düğmesine (kare ve ok) bas › "Ana Ekrana Ekle". Sonra uygulamayı ana ekrandaki "Hello Vespa" ikonundan açıp burada giriş yap.</div>
     <label for="kKod">Giriş kodu ya da link</label>
     <textarea id="kKod" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="ortak şifren (XXXXX-XXXXX) ya da sana gelen link"></textarea>
     <div id="kSifreAlan" hidden style="margin-top:12px"><label for="kSifre">Ortak paneli şifresi</label><input id="kSifre" type="text" spellcheck="false" autocapitalize="characters" placeholder="XXXXX-XXXXX"></div>
@@ -95,7 +95,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.8.0" };
+  var AYAR = { adres: "", surum: "1.8.1" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -315,7 +315,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
   var BLD = {
     // { tamam } ya da { tamam: false, neden }
     destek: function () {
-      if (ios && !bagimsiz) return { tamam: false, neden: "ana", metin: "iPhone'da bildirimler sadece ana ekrana eklenen uygulamada çalışır: Safari › Paylaş › Ana Ekrana Ekle, sonra Turlar'ı ana ekrandan aç." };
+      if (ios && !bagimsiz) return { tamam: false, neden: "ana", metin: "iPhone'da bildirimler sadece ana ekrana eklenen uygulamada çalışır: Safari › Paylaş › Ana Ekrana Ekle, sonra Hello Vespa'yı ana ekrandan aç." };
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return { tamam: false, neden: "yok", metin: ios ? "Bu iPhone'da bildirim için iOS 16.4 ya da üstü gerekiyor (Ayarlar › Genel › Yazılım Güncelleme)." : "Bu tarayıcı bildirimleri desteklemiyor." };
       return { tamam: true };
     },
@@ -330,7 +330,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       var izin;
       try { izin = Notification.requestPermission(); } catch (e) { return Promise.reject(e); }
       return Promise.resolve(izin).then(function (iz) {
-        if (iz !== "granted") throw new Error(iz === "denied" ? "Bildirim izni kapalı. iPhone: Ayarlar › Bildirimler › Turlar › Bildirimlere İzin Ver." : "Bildirim izni verilmedi.");
+        if (iz !== "granted") throw new Error(iz === "denied" ? "Bildirim izni kapalı. iPhone: Ayarlar › Bildirimler › Hello Vespa › Bildirimlere İzin Ver." : "Bildirim izni verilmedi.");
         return navigator.serviceWorker.ready;
       }).then(function (r) {
         return r.pushManager.getSubscription().then(function (var_) {
@@ -512,7 +512,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
       + "if(x.acik){[['dene',x.dene],['kapat',x.kapat]].forEach(function(p){var l=document.createElement('button');l.type='button';l.textContent=p[1];l.style.cssText='border:0;background:none;font:inherit;color:#8A8378;text-decoration:underline;margin-left:12px';l.onclick=function(){parent.__surucuBildirim(p[0],zc);};z.appendChild(l);});}"
       + "if(x.ipucu){var i=document.createElement('div');i.textContent=x.ipucu;i.style.cssText='font-size:13px;color:#8A8378;margin-top:4px';z.appendChild(i);}};"
       + "d.appendChild(z);parent.__surucuBildirim('durum',zc);"
-      + "var b=document.createElement('button');b.type='button';b.textContent='Turlar uygulaması · çıkış';b.style.cssText='border:0;background:none;color:#8A8378;font:inherit;text-decoration:underline';b.onclick=function(){parent.__surucuCikis();};d.appendChild(b);document.body.appendChild(d);});"
+      + "var b=document.createElement('button');b.type='button';b.textContent='Hello Vespa uygulaması · çıkış';b.style.cssText='border:0;background:none;color:#8A8378;font:inherit;text-decoration:underline';b.onclick=function(){parent.__surucuCikis();};d.appendChild(b);document.body.appendChild(d);});"
       + "})();<\/script>";
     function goster(html) {
       var i = html.indexOf("<head>");

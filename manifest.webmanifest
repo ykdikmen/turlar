@@ -1,17 +1,32 @@
 {
-  "name": "Turlar · Hello Vespa Roma",
-  "short_name": "Turlar",
+  "name": "Hello Vespa Roma",
+  "short_name": "Hello Vespa",
   "description": "Program, ödemeler, cari hesap ve raporlar",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#EAE5DB",
+  "background_color": "#FFFFFF",
   "theme_color": "#EAE5DB",
   "icons": [
-    { "src": "ikon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "ikon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "ikon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "ikon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
