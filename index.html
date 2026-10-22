@@ -95,7 +95,7 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 <script>
 (function () {
   "use strict";
-  var AYAR = { adres: "", surum: "1.5.0" };
+  var AYAR = { adres: "", surum: "1.6.0" };
   if (AYAR.adres.indexOf("%%") === 0) AYAR.adres = "";
   var D_OTURUM = "turlar.oturum", D_PAKET = "turlar.paket";
   var $ = function (id) { return document.getElementById(id); };
@@ -259,8 +259,9 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
   }
   function cikis() {
     sil(D_OTURUM);
-    try { localStorage.removeItem("turlar.sekme"); } catch (e) {}
-    verileriSil();
+    try { localStorage.removeItem("turlar.sekme"); localStorage.removeItem("turlar.surucuSayfa"); } catch (e) {}
+    var bitti = function () { verileriSil(); };
+    try { caches.delete("turlar-belgeler").then(bitti, bitti); } catch (e) { bitti(); } // motor belgeleri telefonda kalmasın
   }
   // Google'daki Kod.gs uygulamayı tanıyor mu (sürüm 7 dağıtıldı mı)? Menü'de gösterilir
   function sunucuDurumu(o) {
@@ -432,12 +433,21 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
   // bildirime dokununca gelen adres: #onay=… (ataması) · #tur=… (sürücü: turun sayfası)
   function adresIsle(o, h) {
     h = String(h || "");
-    var m = h.match(/#onay=([^&]+)/), t = h.match(/#tur=([^&]+)/);
-    if (!m && !(t && o.rol === "surucu")) return false;
+    var m = h.match(/#onay=([^&]+)/), t = h.match(/#tur=([^&]+)/), kp = h.match(/#kapat=([^&]+)/), mt = /#motor(&|$)/.test(h);
+    if (!m && !(o.rol === "surucu" && (t || kp || mt))) return false;
     try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
     if (m) onayGoster(o, decodeURIComponent(m[1]));
+    else if (kp) surucuSayfaIs(function (w) { return typeof w.kapatAc === "function" && w.kapatAc(decodeURIComponent(kp[1])); }); // tur bitti: turu kapat formu
+    else if (mt) surucuSayfaIs(function (w) { return typeof w.motorumAc === "function" && w.motorumAc(); }); // motor sana verildi
     else surucuTurAc(decodeURIComponent(t[1]));
     return true;
+  }
+  function surucuSayfaIs(fn) {
+    var dene = 0;
+    (function bak() {
+      try { var w = surucuCerceve && surucuCerceve.contentWindow; if (w && w.D && fn(w)) return; } catch (e) {}
+      if (++dene < 45) setTimeout(bak, 300);
+    })();
   }
   function surucuTurAc(id) {
     var dene = 0;
