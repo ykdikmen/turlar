@@ -1,9 +1,11 @@
 {
- "dosya": "uyg.bin?v=4f7c38a05f",
- "surum": "1.9.0",
+ "dosya": "uyg.bin?v=7081ffd894",
+ "dosyaZ": "uyg-z.bin?v=7081ffd894",
+ "surum": "1.10.0",
  "turlar": "51",
- "tarih": "2026-10-22T23:19:41.485Z",
- "boy": 802327,
+ "tarih": "2026-10-23T14:40:12.619Z",
+ "boy": 821437,
+ "boyZ": 319487,
  "sunucu": {
   "kod": 16,
   "dosya": "sunucu.bin?v=812b5010ef",

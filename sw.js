@@ -1,7 +1,7 @@
 // Turlar uygulaması · çevrimdışı açılış: uygulama dosyaları telefonda saklanır. Google'a giden istekler buraya uğramaz.
-const KABUK = "turlar-kabuk-4f7c38a05f";
+const KABUK = "turlar-kabuk-7081ffd894";
 const PAKET = "turlar-paket";
-const DOSYALAR = ["./", "index.html", "manifest.webmanifest", "ikon-180.png", "ikon-192.png", "ikon-512.png"];
+const DOSYALAR = ["./", "index.html", "manifest.webmanifest", "ikon-180.png", "ikon-192.png", "ikon-512.png", "archivo-1.woff2", "archivo-2.woff2"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(KABUK).then((c) => c.addAll(DOSYALAR)).then(() => self.skipWaiting()));
 });
