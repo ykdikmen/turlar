@@ -1,14 +1,14 @@
 {
- "dosya": "uyg.bin?v=7081ffd894",
- "dosyaZ": "uyg-z.bin?v=7081ffd894",
- "surum": "1.10.0",
- "turlar": "51",
- "tarih": "2026-10-23T14:40:12.619Z",
- "boy": 821437,
- "boyZ": 319487,
+ "dosya": "uyg.bin?v=32d0735ed1",
+ "dosyaZ": "uyg-z.bin?v=32d0735ed1",
+ "surum": "1.11.0",
+ "turlar": "52",
+ "tarih": "2026-10-24T09:57:30.701Z",
+ "boy": 867111,
+ "boyZ": 332426,
  "sunucu": {
-  "kod": 16,
-  "dosya": "sunucu.bin?v=812b5010ef",
-  "boy": 385306
+  "kod": 17,
+  "dosya": "sunucu.bin?v=51ec50a3fb",
+  "boy": 399376
  }
 }
